@@ -1,8 +1,8 @@
-name: Daily GrantConnect Scrape
+﻿name: Daily GrantConnect Scrape
 
 on:
   schedule:
-    - cron: '0 19 * * *'   # 5:00 AM AEST (UTC+10)
+    - cron: '7 19 * * *'   # 05:07 AM AEST (UTC+10) — a few min past the hour; GitHub drops on-the-hour scheduled runs under load
   workflow_dispatch:
 
 env:
