@@ -76,7 +76,9 @@ def load_known_go_urls() -> set[str]:
     path = Path(CONFIG["known_gos_file"])
     if not path.exists():
         return set()
-    with open(path, encoding="utf-8") as f:
+    # utf-8-sig tolerates a stray BOM (e.g. if the file was ever rewritten by an
+    # editor / PowerShell) so a malformed-but-valid JSON file never crashes the run.
+    with open(path, encoding="utf-8-sig") as f:
         return set(json.load(f))
 
 
