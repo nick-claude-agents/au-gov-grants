@@ -1,4 +1,4 @@
-﻿name: Daily GrantConnect Scrape
+name: Daily GrantConnect Scrape
 
 on:
   schedule:
