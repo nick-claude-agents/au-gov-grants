@@ -202,9 +202,23 @@ async def collect_all_go_opportunities(context) -> list[dict]:
     seen: set[str] = set()
 
     try:
-        log.info("Loading Grant Opportunity listing page 1...")
-        await page.goto(CONFIG["listing_url"], wait_until="networkidle",
-                        timeout=CONFIG["page_load_timeout"])
+        # Retry page 1 up to 3 times — the site occasionally serves a bot-detection
+        # redirect or empty page that resolves networkidle immediately with no content.
+        for attempt in range(1, 4):
+            log.info(f"Loading Grant Opportunity listing page 1 (attempt {attempt})...")
+            await page.goto(CONFIG["listing_url"], wait_until="networkidle",
+                            timeout=CONFIG["page_load_timeout"])
+            # Quick sanity check: if any /Go/Show links are present we're good
+            has_links = await page.evaluate(
+                "() => document.querySelectorAll(\"a[href*='/Go/Show']\").length > 0"
+            )
+            if has_links:
+                break
+            if attempt < 3:
+                log.warning(f"Page 1 loaded but no /Go/Show links found — waiting 15s then retrying...")
+                await asyncio.sleep(15)
+        else:
+            log.warning("Page 1 returned no /Go/Show links after 3 attempts.")
 
         pag_numbers = await page.eval_on_selector_all(
             ".pagination a, [class*='pag'] a",
@@ -737,6 +751,15 @@ async def main():
 
         opps = await collect_all_go_opportunities(context)
         urls = [o["url"] for o in opps]
+
+        if not opps:
+            log.error(
+                "Collected 0 grant opportunities — the listing page likely returned "
+                "a bot-detection redirect or empty response. Aborting without sending "
+                "email so yesterday's results are not overwritten."
+            )
+            await browser.close()
+            sys.exit(1)
 
         # Detect new grant opportunities vs previous run
         known_urls = load_known_go_urls()
