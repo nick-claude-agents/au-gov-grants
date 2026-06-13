@@ -47,7 +47,7 @@ CONFIG = {
     "log_file": str(Path(__file__).parent / "grants_scraper.log"),
     "registry_file": str(Path(__file__).parent / "grants_email_registry.xlsx"),
     "known_gos_file": str(Path(__file__).parent / "grants_known_gos.json"),
-    "pages_url": "https://nick-claude-agents.github.io/au-gov-grants/",
+    "pages_url": "https://parbery.appromptu.com/feeds/grants",
     # In GitHub Actions (the au-gov-grants repo) write index.html for Pages.
     # Locally, write grants_latest.html so we don't clobber the corporate-plans
     # dashboard's index.html that shares this Dropbox folder.

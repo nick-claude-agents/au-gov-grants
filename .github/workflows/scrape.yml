@@ -33,6 +33,13 @@ jobs:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: python grants_scraper.py
 
+      - name: Publish to Cloudflare KV
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          curl -fsS -X PUT "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/5a9cf7af83bf45619fcb4b63fd1ac186/values/grants:latest" -H "Authorization: Bearer ${CF_API_TOKEN}" -H "Content-Type: text/html" --data-binary @index.html
+
       - name: Commit and push results
         run: |
           git config user.name "github-actions[bot]"
